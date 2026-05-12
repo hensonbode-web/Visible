@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visible — Get Found Everywhere</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@300;400;500;700;800;900&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,400;1,9..144,600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08080a;
+  --bg2:#0f0f12;
+  --surface:#16161a;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.12);
+  --text:#f0f0ee;
+  --text2:#8a8a88;
+  --text3:#4a4a48;
+  --gold:#d4a853;
+  --gold2:#e8c47a;
+  --gold3:rgba(212,168,83,0.12);
+  --green:#1db954;
+  --red:#e05252;
+}
+html{font-size:16px;-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{font-family:'Cabinet Grotesk',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;cursor:none}
+
+/* CUSTOM CURSOR */
+.cursor{
+  position:fixed;width:10px;height:10px;
+  border-radius:50%;background:var(--gold);
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:transform 0.1s,width 0.3s,height 0.3s,background 0.3s;
+  mix-blend-mode:difference
+}
+.cursor-ring{
+  position:fixed;width:36px;height:36px;
+  border-radius:50%;border:1px solid rgba(212,168,83,0.5);
+  pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:transform 0.15s ease-out,width 0.3s,height 0.3s,opacity 0.3s
+}
+.cursor.hover{width:20px;height:20px}
+.cursor-ring.hover{width:56px;height:56px;opacity:0.5}
+
+/* NOISE OVERLAY */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:1;opacity:0.4
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2.5rem;height:68px;
+  background:rgba(8,8,10,0.8);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  transition:all 0.3s
+}
+nav.scrolled{background:rgba(8,8,10,0.95)}
+.nav-brand{display:flex;align-items:center;gap:10px}
+.nav-gem{
+  width:30px;height:30px;
+  position:relative;display:flex;align-items:center;justify-content:center
+}
+.nav-gem svg{width:30px;height:30px}
+.nav-name{
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:17px;font-weight:800;
+  letter-spacing:-0.02em;color:var(--text)
+}
+.nav-links{display:flex;align-items:center;gap:2rem}
+.nav-link{
+  font-size:13px;font-weight:500;color:var(--text2);
+  text-decoration:none;letter-spacing:0.02em;
+  transition:color 200ms;position:relative
+}
+.nav-link::after{
+  content:'';position:absolute;bottom:-2px;left:0;right:0;
+  height:1px;background:var(--gold);
+  transform:scaleX(0);transition:transform 300ms
+}
+.nav-link:hover{color:var(--text)}
+.nav-link:hover::after{transform:scaleX(1)}
+.nav-cta{
+  padding:10px 22px;border-radius:8px;
+  background:var(--gold);color:var(--bg);
+  font-size:13px;font-weight:700;
+  text-decoration:none;letter-spacing:0.02em;
+  transition:all 250ms;
+  box-shadow:0 0 20px rgba(212,168,83,0.3)
+}
+.nav-cta:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 0 30px rgba(212,168,83,0.5)}
+
+/* HERO */
+.hero{
+  min-height:100vh;
+  display:flex;align-items:center;
+  padding:100px 2.5rem 80px;
+  position:relative;overflow:hidden
+}
+
+/* Animated grid background */
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(212,168,83,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(212,168,83,0.03) 1px,transparent 1px);
+  background-size:80px 80px;
+  animation:gridMove 20s linear infinite;
+  pointer-events:none
+}
+@keyframes gridMove{
+  0%{transform:translateY(0)}
+  100%{transform:translateY(80px)}
+}
+
+/* Glowing orbs */
+.orb{
+  position:absolute;border-radius:50%;
+  filter:blur(80px);pointer-events:none;
+  animation:orbFloat 8s ease-in-out infinite
+}
+.orb-1{width:600px;height:600px;background:rgba(212,168,83,0.06);top:-200px;right:-100px;animation-delay:0s}
+.orb-2{width:400px;height:400px;background:rgba(29,185,84,0.04);bottom:-100px;left:-100px;animation-delay:-4s}
+@keyframes orbFloat{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-30px) scale(1.05)}
+}
+
+.hero-inner{
+  max-width:1200px;margin:0 auto;width:100%;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:6rem;align-items:center;position:relative;z-index:2
+}
+
+.hero-left{}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 14px;border-radius:20px;
+  border:1px solid rgba(212,168,83,0.3);
+  background:rgba(212,168,83,0.08);
+  font-size:12px;font-weight:600;color:var(--gold);
+  letter-spacing:0.08em;text-transform:uppercase;
+  margin-bottom:2rem;
+  opacity:0;animation:fadeUp 0.8s 0.2s ease forwards
+}
+.hero-eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+
+.hero-h1{
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:68px;font-weight:900;
+  letter-spacing:-0.04em;line-height:0.95;
+  margin-bottom:1.5rem;
+  opacity:0;animation:fadeUp 0.8s 0.3s ease forwards
+}
+.hero-h1 .line{display:block;overflow:hidden}
+.hero-h1 .word-gold{
+  font-family:'Fraunces',serif;
+  font-style:italic;font-weight:400;
+  color:var(--gold);
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent
+}
+
+.hero-sub{
+  font-size:17px;font-weight:400;
+  color:var(--text2);line-height:1.7;
+  margin-bottom:2.5rem;max-width:440px;
+  opacity:0;animation:fadeUp 0.8s 0.4s ease forwards
+}
+
+.hero-actions{
+  display:flex;align-items:center;gap:14px;
+  opacity:0;animation:fadeUp 0.8s 0.5s ease forwards
+}
+.btn-gold{
+  padding:16px 32px;border-radius:10px;
+  background:var(--gold);color:var(--bg);
+  font-size:15px;font-weight:700;
+  text-decoration:none;letter-spacing:0.01em;
+  transition:all 250ms;
+  box-shadow:0 0 30px rgba(212,168,83,0.25)
+}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 0 50px rgba(212,168,83,0.4)}
+.btn-ghost{
+  padding:16px 32px;border-radius:10px;
+  border:1px solid var(--border2);
+  background:transparent;color:var(--text2);
+  font-size:15px;font-weight:500;
+  text-decoration:none;letter-spacing:0.01em;
+  transition:all 250ms
+}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);background:rgba(212,168,83,0.05)}
+
+/* HERO CARD — 3D rotating dashboard */
+.hero-right{
+  position:relative;
+  opacity:0;animation:fadeLeft 1s 0.6s ease forwards;
+  perspective:1000px
+}
+@keyframes fadeLeft{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+
+.dashboard-card{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 40px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.05);
+  transform-style:preserve-3d;
+  transition:transform 0.1s ease
+}
+
+.card-topbar{
+  display:flex;align-items:center;gap:8px;
+  padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,0.02)
+}
+.card-dots{display:flex;gap:6px}
+.card-dot{width:10px;height:10px;border-radius:50%}
+.dot-red{background:#ff5f56}
+.dot-yellow{background:#ffbd2e}
+.dot-green{background:#27c93f}
+.card-title-bar{
+  margin:0 auto;
+  font-size:11px;font-weight:600;color:var(--text3);
+  letter-spacing:0.06em;text-transform:uppercase
+}
+
+.card-body{padding:20px}
+
+.presence-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px
+}
+.presence-title{font-size:12px;font-weight:700;color:var(--text2);letter-spacing:0.06em;text-transform:uppercase}
+.presence-live{
+  display:flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:20px;
+  background:rgba(29,185,84,0.12);border:1px solid rgba(29,185,84,0.2);
+  font-size:10px;font-weight:700;color:var(--green);letter-spacing:0.04em
+}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+
+.platform-items{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.platform-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-radius:10px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  transition:all 300ms
+}
+.platform-item:hover{background:rgba(255,255,255,0.06);border-color:var(--border2)}
+.platform-left{display:flex;align-items:center;gap:10px}
+.platform-emoji{
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0
+}
+.platform-name{font-size:12.5px;font-weight:600;color:var(--text)}
+.platform-detail{font-size:10.5px;color:var(--text3);margin-top:1px}
+.status-tag{
+  padding:3px 9px;border-radius:20px;
+  font-size:10px;font-weight:700;letter-spacing:0.04em
+}
+.tag-live{background:rgba(29,185,84,0.12);color:var(--green)}
+.tag-missing{background:rgba(224,82,82,0.12);color:var(--red)}
+.tag-weak{background:rgba(212,168,83,0.12);color:var(--gold)}
+
+.stats-row{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:10px;padding-top:16px;
+  border-top:1px solid var(--border)
+}
+.stat-box{
+  background:rgba(255,255,255,0.02);
+  border:1px solid var(--border);
+  border-radius:10px;padding:12px;text-align:center
+}
+.stat-val{
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:22px;font-weight:900;
+  letter-spacing:-0.03em;color:var(--text);
+  margin-bottom:3px
+}
+.stat-val.up{color:var(--green)}
+.stat-label{font-size:10px;color:var(--text3);font-weight:500;letter-spacing:0.04em;text-transform:uppercase}
+
+/* Floating tag above card */
+.float-badge{
+  position:absolute;top:-18px;right:20px;
+  background:var(--gold);color:var(--bg);
+  padding:8px 16px;border-radius:8px;
+  font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;
+  box-shadow:0 8px 24px rgba(212,168,83,0.4)
+}
+
+/* Floating notification */
+.float-notif{
+  position:absolute;bottom:-16px;left:-20px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:12px 16px;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.5);
+  animation:notifFloat 4s ease-in-out infinite
+}
+@keyframes notifFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
+}
+.notif-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(29,185,84,0.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0
+}
+.notif-text{font-size:12px;font-weight:700;color:var(--text)}
+.notif-sub{font-size:10px;color:var(--text3);margin-top:1px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* MARQUEE */
+.marquee-wrap{
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:16px 0;overflow:hidden;
+  background:rgba(255,255,255,0.01)
+}
+.marquee-track{
+  display:flex;gap:3rem;
+  animation:marquee 20s linear infinite;
+  width:max-content
+}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.marquee-item{
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;font-weight:500;color:var(--text3);
+  white-space:nowrap;letter-spacing:0.04em
+}
+.marquee-sep{color:var(--gold);font-size:8px}
+
+/* SCROLL REVEAL */
+.reveal{
+  opacity:0;transform:translateY(30px);
+  transition:opacity 0.7s ease,transform 0.7s ease
+}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+.reveal-delay-4{transition-delay:0.4s}
+
+/* SECTION STYLES */
+.section-wrap{padding:8rem 2.5rem;max-width:1200px;margin:0 auto}
+
+.section-eyebrow{
+  font-size:11px;font-weight:700;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--gold);
+  margin-bottom:1rem
+}
+.section-h{
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:52px;font-weight:900;
+  letter-spacing:-0.04em;line-height:1;
+  margin-bottom:1rem
+}
+.section-h em{
+  font-family:'Fraunces',serif;
+  font-style:italic;font-weight:400;color:var(--gold)
+}
+.section-sub{
+  font-size:17px;font-weight:400;
+  color:var(--text2);line-height:1.7;
+  max-width:500px;margin-bottom:4rem
+}
+
+/* PROBLEM SECTION */
+.problem-section{
+  padding:8rem 2.5rem;
+  border-top:1px solid var(--border)
+}
+.problem-inner{max-width:1200px;margin:0 auto}
+
+.problem-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;margin-top:4rem}
+.problem-card{
+  padding:2rem;border-radius:16px;
+  border:1px solid var(--border);
+  background:var(--bg2);
+  position:relative;overflow:hidden;
+  transition:all 300ms
+}
+.problem-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 0%,rgba(212,168,83,0.06),transparent 60%);
+  opacity:0;transition:opacity 300ms
+}
+.problem-card:hover{border-color:rgba(212,168,83,0.3);transform:translateY(-4px)}
+.problem-card:hover::before{opacity:1}
+.problem-icon-wrap{
+  width:48px;height:48px;border-radius:12px;
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-bottom:1.25rem;
+  background:rgba(255,255,255,0.02)
+}
+.problem-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-0.02em}
+.problem-desc{font-size:14px;color:var(--text2);line-height:1.7;font-weight:400}
+
+/* SERVICES SECTION */
+.services-section{
+  padding:8rem 2.5rem;
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+  border-top:1px solid var(--border)
+}
+.services-inner{max-width:1200px;margin:0 auto}
+
+.services-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:1.5rem;margin-top:4rem
+}
+.service-card{
+  padding:2.5rem;border-radius:20px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  position:relative;overflow:hidden;
+  transition:all 300ms
+}
+.service-card:hover{border-color:rgba(212,168,83,0.3);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.service-num{
+  font-family:'Fraunces',serif;
+  font-size:11px;font-style:italic;
+  color:var(--gold);margin-bottom:1.25rem;
+  letter-spacing:0.06em
+}
+.service-title{font-size:22px;font-weight:900;color:var(--text);letter-spacing:-0.03em;margin-bottom:10px}
+.service-desc{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:1.5rem}
+.service-tags{display:flex;flex-wrap:wrap;gap:7px}
+.service-tag{
+  padding:5px 12px;border-radius:20px;
+  border:1px solid var(--border2);
+  font-size:11px;color:var(--text3);font-weight:500;
+  letter-spacing:0.03em
+}
+
+/* HOW IT WORKS */
+.steps-section{
+  padding:8rem 2.5rem;
+  border-top:1px solid var(--border)
+}
+.steps-inner{max-width:1200px;margin:0 auto}
+.steps-track{
+  display:grid;grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:0;margin-top:4rem;position:relative
+}
+.steps-track::before{
+  content:'';position:absolute;
+  top:24px;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--border2),var(--gold),var(--border2),transparent)
+}
+.step-item{padding:0 1.5rem;position:relative}
+.step-num-wrap{
+  width:48px;height:48px;border-radius:50%;
+  border:1px solid var(--border2);
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:1.5rem;position:relative;z-index:1;
+  transition:all 300ms
+}
+.step-item:hover .step-num-wrap{border-color:var(--gold);background:rgba(212,168,83,0.1)}
+.step-num{
+  font-family:'Fraunces',serif;font-size:16px;
+  font-style:italic;color:var(--gold);font-weight:600
+}
+.step-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-0.02em}
+.step-desc{font-size:13px;color:var(--text2);line-height:1.65}
+
+/* PRICING */
+.pricing-section{
+  padding:8rem 2.5rem;
+  border-top:1px solid var(--border);
+  background:var(--bg2)
+}
+.pricing-inner{max-width:1200px;margin:0 auto}
+.pricing-grid{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:1.5rem;margin-top:4rem
+}
+
+.price-card{
+  border-radius:20px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  padding:2.5rem;
+  position:relative;overflow:hidden;
+  transition:all 300ms
+}
+.price-card:hover{transform:translateY(-6px);box-shadow:0 30px 60px rgba(0,0,0,0.4)}
+
+.price-card.featured{
+  border-color:var(--gold);
+  background:linear-gradient(160deg,rgba(212,168,83,0.08),var(--surface) 60%)
+}
+.price-card.featured::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% -20%,rgba(212,168,83,0.12),transparent 60%);
+  pointer-events:none
+}
+
+.price-badge{
+  display:inline-block;padding:5px 12px;border-radius:20px;
+  font-size:10px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;
+  margin-bottom:1.5rem
+}
+.badge-dim{background:rgba(255,255,255,0.05);color:var(--text3)}
+.badge-gold{background:rgba(212,168,83,0.2);color:var(--gold);border:1px solid rgba(212,168,83,0.3)}
+.badge-hot{background:rgba(29,185,84,0.1);color:var(--green);border:1px solid rgba(29,185,84,0.2)}
+
+.price-name{font-size:14px;font-weight:700;color:var(--text2);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:1rem}
+
+.price-amount{
+  display:flex;align-items:flex-start;gap:4px;margin-bottom:4px
+}
+.price-dollar{font-size:22px;font-weight:700;color:var(--text2);margin-top:6px}
+.price-num{
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:56px;font-weight:900;
+  letter-spacing:-0.05em;line-height:1;color:var(--text)
+}
+.price-period{font-size:13px;color:var(--text3);margin-bottom:1.5rem}
+.price-setup{
+  font-size:11px;color:var(--text3);
+  padding:6px 12px;border-radius:6px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  display:inline-block;margin-bottom:2rem;
+  letter-spacing:0.02em
+}
+.price-divider{height:1px;background:var(--border);margin-bottom:2rem}
+.price-features{display:flex;flex-direction:column;gap:12px;margin-bottom:2rem}
+.price-feature{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:13.5px;color:var(--text2);line-height:1.5;font-weight:400
+}
+.feat-check{
+  width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px
+}
+.feat-check svg{width:10px;height:10px;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.check-green .feat-check{background:rgba(29,185,84,0.12)}
+.check-green .feat-check svg{stroke:var(--green)}
+.check-gold .feat-check{background:rgba(212,168,83,0.12)}
+.check-gold .feat-check svg{stroke:var(--gold)}
+
+.price-btn{
+  width:100%;padding:14px;border-radius:10px;
+  font-size:14px;font-weight:800;
+  font-family:'Cabinet Grotesk',sans-serif;
+  cursor:pointer;transition:all 250ms;
+  border:none;letter-spacing:0.02em
+}
+.price-btn.outline{
+  background:transparent;color:var(--text2);
+  border:1px solid var(--border2)
+}
+.price-btn.outline:hover{border-color:var(--gold);color:var(--gold);background:rgba(212,168,83,0.05)}
+.price-btn.solid-gold{
+  background:var(--gold);color:var(--bg);
+  box-shadow:0 0 30px rgba(212,168,83,0.3)
+}
+.price-btn.solid-gold:hover{background:var(--gold2);box-shadow:0 0 50px rgba(212,168,83,0.5);transform:translateY(-1px)}
+.price-btn.solid-white{
+  background:var(--text);color:var(--bg)
+}
+.price-btn.solid-white:hover{background:rgba(240,240,238,0.9);transform:translateY(-1px)}
+
+/* COUNTER SECTION */
+.counter-section{
+  padding:6rem 2.5rem;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border)
+}
+.counter-inner{
+  max-width:1200px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2rem;
+  text-align:center
+}
+.counter-item{}
+.counter-num{
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:60px;font-weight:900;
+  letter-spacing:-0.05em;color:var(--text);
+  line-height:1;margin-bottom:8px
+}
+.counter-num span{color:var(--gold)}
+.counter-label{font-size:14px;color:var(--text3);font-weight:500}
+
+/* CTA */
+.cta-section{
+  padding:8rem 2.5rem;
+  text-align:center;position:relative;overflow:hidden
+}
+.cta-section::before{
+  content:'';position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  width:800px;height:400px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(212,168,83,0.08),transparent 70%);
+  pointer-events:none
+}
+.cta-inner{max-width:700px;margin:0 auto;position:relative;z-index:1}
+.cta-h{
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:64px;font-weight:900;
+  letter-spacing:-0.05em;line-height:0.95;
+  margin-bottom:1.25rem
+}
+.cta-h em{
+  font-family:'Fraunces',serif;
+  font-style:italic;font-weight:400;color:var(--gold)
+}
+.cta-sub{font-size:17px;color:var(--text2);line-height:1.7;margin-bottom:3rem}
+.cta-actions{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--border);
+  padding:2rem 2.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:1rem
+}
+.footer-left{display:flex;align-items:center;gap:10px}
+.footer-copy{font-size:12.5px;color:var(--text3)}
+.footer-links{display:flex;gap:2rem}
+.footer-link{font-size:12.5px;color:var(--text3);text-decoration:none;transition:color 150ms}
+.footer-link:hover{color:var(--gold)}
+
+@media(max-width:1024px){
+  .hero-inner{grid-template-columns:1fr;gap:4rem}
+  .hero-right{display:none}
+  .services-grid{grid-template-columns:1fr}
+  .pricing-grid{grid-template-columns:1fr}
+  .steps-track{grid-template-columns:1fr 1fr;gap:3rem}
+  .steps-track::before{display:none}
+  .counter-inner{grid-template-columns:1fr 1fr}
+  .hero-h1{font-size:52px}
+  .section-h,.cta-h{font-size:40px}
+}
+
+@media(max-width:680px){
+  nav{padding:0 1.25rem}
+  .nav-links{display:none}
+  .hero-inner,.section-wrap,.problem-section,.services-section,.steps-section,.pricing-section,.cta-section{padding-left:1.25rem;padding-right:1.25rem}
+  .problem-grid{grid-template-columns:1fr}
+  .steps-track{grid-template-columns:1fr}
+  .counter-inner{grid-template-columns:1fr 1fr}
+  .hero-h1{font-size:40px}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-brand">
+    <div class="nav-gem">
+      <svg viewBox="0 0 30 30" fill="none">
+        <polygon points="15,2 28,9 28,21 15,28 2,21 2,9" fill="rgba(212,168,83,0.15)" stroke="var(--gold)" stroke-width="1.5"/>
+        <polygon points="15,8 22,12 22,18 15,22 8,18 8,12" fill="var(--gold)" opacity="0.8"/>
+      </svg>
+    </div>
+    <span class="nav-name">Visible</span>
+  </div>
+  <div class="nav-links">
+    <a href="#services" class="nav-link">Services</a>
+    <a href="#pricing" class="nav-link">Pricing</a>
+    <a href="#how" class="nav-link">How it works</a>
+  </div>
+  <a href="#pricing" class="nav-cta">Get started</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-eyebrow">
+        <div class="hero-eyebrow-dot"></div>
+        Local presence management
+      </div>
+      <h1 class="hero-h1">
+        <span class="line">Your business</span>
+        <span class="line">should be</span>
+        <span class="line word-gold">impossible</span>
+        <span class="line">to miss.</span>
+      </h1>
+      <p class="hero-sub">We make sure your business shows up everywhere customers search — Google, Yelp, Apple Maps, Facebook, and 50+ more. More visibility. More calls. More revenue.</p>
+      <div class="hero-actions">
+        <a href="#pricing" class="btn-gold">Get started today</a>
+        <a href="#how" class="btn-ghost">See how it works →</a>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="float-badge">After Visible</div>
+      <div class="dashboard-card" id="dashCard">
+        <div class="card-topbar">
+          <div class="card-dots">
+            <div class="card-dot dot-red"></div>
+            <div class="card-dot dot-yellow"></div>
+            <div class="card-dot dot-green"></div>
+          </div>
+          <div class="card-title-bar">Presence Dashboard</div>
+        </div>
+        <div class="card-body">
+          <div class="presence-header">
+            <div class="presence-title">Platform Status</div>
+            <div class="presence-live"><div class="live-dot"></div>8 Active</div>
+          </div>
+          <div class="platform-items">
+            <div class="platform-item">
+              <div class="platform-left">
+                <div class="platform-emoji" style="background:rgba(66,133,244,0.1)">🔍</div>
+                <div>
+                  <div class="platform-name">Google Business</div>
+                  <div class="platform-detail">4.9 stars · 143 reviews</div>
+                </div>
+              </div>
+              <div class="status-tag tag-live">Live</div>
+            </div>
+            <div class="platform-item">
+              <div class="platform-left">
+                <div class="platform-emoji" style="background:rgba(255,90,95,0.1)">⭐</div>
+                <div>
+                  <div class="platform-name">Yelp</div>
+                  <div class="platform-detail">4.7 stars · 89 reviews</div>
+                </div>
+              </div>
+              <div class="status-tag tag-live">Live</div>
+            </div>
+            <div class="platform-item">
+              <div class="platform-left">
+                <div class="platform-emoji" style="background:rgba(255,255,255,0.05)">🗺</div>
+                <div>
+                  <div class="platform-name">Apple Maps</div>
+                  <div class="platform-detail">Claimed & verified</div>
+                </div>
+              </div>
+              <div class="status-tag tag-live">Live</div>
+            </div>
+            <div class="platform-item">
+              <div class="platform-left">
+                <div class="platform-emoji" style="background:rgba(66,103,178,0.1)">📘</div>
+                <div>
+                  <div class="platform-name">Facebook</div>
+                  <div class="platform-detail">Updated this week</div>
+                </div>
+              </div>
+              <div class="status-tag tag-live">Live</div>
+            </div>
+          </div>
+          <div class="stats-row">
+            <div class="stat-box">
+              <div class="stat-val up">+312%</div>
+              <div class="stat-label">Views</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val">50+</div>
+              <div class="stat-label">Platforms</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val">4.9</div>
+              <div class="stat-label">Avg rating</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="float-notif">
+        <div class="notif-icon">📞</div>
+        <div>
+          <div class="notif-text">New customer call</div>
+          <div class="notif-sub">Found you on Google · 2 min ago</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <div class="marquee-item">Google Business <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Apple Maps <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Yelp <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Facebook <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Bing Places <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">NextDoor <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Angi <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Yellow Pages <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">BBB <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Foursquare <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">HomeAdvisor <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Thumbtack <span class="marquee-sep">✦</span></div>
+    <!-- Duplicate for seamless loop -->
+    <div class="marquee-item">Google Business <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Apple Maps <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Yelp <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Facebook <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Bing Places <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">NextDoor <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Angi <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Yellow Pages <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">BBB <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Foursquare <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">HomeAdvisor <span class="marquee-sep">✦</span></div>
+    <div class="marquee-item">Thumbtack <span class="marquee-sep">✦</span></div>
+  </div>
+</div>
+
+<!-- COUNTERS -->
+<section class="counter-section">
+  <div class="counter-inner">
+    <div class="counter-item reveal">
+      <div class="counter-num"><span class="count" data-target="50">0</span><span>+</span></div>
+      <div class="counter-label">Platforms covered</div>
+    </div>
+    <div class="counter-item reveal reveal-delay-1">
+      <div class="counter-num"><span class="count" data-target="48">0</span><span>hrs</span></div>
+      <div class="counter-label">Setup time</div>
+    </div>
+    <div class="counter-item reveal reveal-delay-2">
+      <div class="counter-num"><span class="count" data-target="300">0</span><span>%</span></div>
+      <div class="counter-label">Avg visibility increase</div>
+    </div>
+    <div class="counter-item reveal reveal-delay-3">
+      <div class="counter-num"><span class="count" data-target="0">0</span><span> contracts</span></div>
+      <div class="counter-label">Cancel anytime</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem-section" id="problem">
+  <div class="problem-inner">
+    <div class="section-eyebrow reveal">The problem</div>
+    <h2 class="section-h reveal">Most local businesses<br>are <em>invisible</em> online.</h2>
+    <p class="section-sub reveal">Your customers are searching right now. If your presence is broken, incomplete, or missing — they're calling your competitor.</p>
+    <div class="problem-grid">
+      <div class="problem-card reveal">
+        <div class="problem-icon-wrap">📍</div>
+        <div class="problem-title">Wrong info everywhere</div>
+        <div class="problem-desc">Outdated phone numbers, wrong hours, and old addresses drive customers away before they ever reach you.</div>
+      </div>
+      <div class="problem-card reveal reveal-delay-1">
+        <div class="problem-icon-wrap">👻</div>
+        <div class="problem-title">Missing on key platforms</div>
+        <div class="problem-desc">Apple Maps, Yelp, Bing — if you're not there, customers can't find you. Most businesses are missing half of them.</div>
+      </div>
+      <div class="problem-card reveal reveal-delay-2">
+        <div class="problem-icon-wrap">⭐</div>
+        <div class="problem-title">Unanswered reviews</div>
+        <div class="problem-desc">94% of customers read reviews before choosing. Not responding to them costs you real jobs every single week.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services-section" id="services">
+  <div class="services-inner">
+    <div class="section-eyebrow reveal">What we do</div>
+    <h2 class="section-h reveal">Everything you need<br>to get <em>found.</em></h2>
+    <p class="section-sub reveal">We handle your entire online presence so you can focus on running your business.</p>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-num">01 — Listings</div>
+        <div class="service-title">Directory Setup & Optimization</div>
+        <div class="service-desc">We claim, build, and optimize your presence on Google, Yelp, Apple Maps, Facebook, Bing, and 50+ more platforms. Consistent, accurate, and complete everywhere.</div>
+        <div class="service-tags">
+          <span class="service-tag">Google Business</span>
+          <span class="service-tag">Apple Maps</span>
+          <span class="service-tag">Yelp</span>
+          <span class="service-tag">50+ platforms</span>
+        </div>
+      </div>
+      <div class="service-card reveal reveal-delay-1">
+        <div class="service-num">02 — Reviews</div>
+        <div class="service-title">Review Management</div>
+        <div class="service-desc">We monitor every review across all platforms and write professional responses that protect your reputation and build trust with future customers.</div>
+        <div class="service-tags">
+          <span class="service-tag">Response writing</span>
+          <span class="service-tag">Review monitoring</span>
+          <span class="service-tag">Reputation tracking</span>
+        </div>
+      </div>
+      <div class="service-card reveal reveal-delay-2">
+        <div class="service-num">03 — Growth</div>
+        <div class="service-title">Review Generation System</div>
+        <div class="service-desc">We build you a simple system to consistently get 5-star reviews from happy customers — turning your best work into your best marketing.</div>
+        <div class="service-tags">
+          <span class="service-tag">Review requests</span>
+          <span class="service-tag">Follow-up sequences</span>
+          <span class="service-tag">Rating growth</span>
+        </div>
+      </div>
+      <div class="service-card reveal reveal-delay-3">
+        <div class="service-num">04 — Reporting</div>
+        <div class="service-title">Monthly Performance Reports</div>
+        <div class="service-desc">Every month you get a clear report showing exactly how many people found you, called you, and visited your website because of your online presence.</div>
+        <div class="service-tags">
+          <span class="service-tag">Search visibility</span>
+          <span class="service-tag">Call tracking</span>
+          <span class="service-tag">Growth metrics</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="steps-section" id="how">
+  <div class="steps-inner">
+    <div class="section-eyebrow reveal">How it works</div>
+    <h2 class="section-h reveal">Up and running<br>in <em>48 hours.</em></h2>
+    <div class="steps-track">
+      <div class="step-item reveal">
+        <div class="step-num-wrap"><div class="step-num">01</div></div>
+        <div class="step-title">You sign up</div>
+        <div class="step-desc">Tell us your business name, location, and services. Takes 5 minutes.</div>
+      </div>
+      <div class="step-item reveal reveal-delay-1">
+        <div class="step-num-wrap"><div class="step-num">02</div></div>
+        <div class="step-title">We audit everything</div>
+        <div class="step-desc">We scan every platform and find exactly what's missing, wrong, or incomplete.</div>
+      </div>
+      <div class="step-item reveal reveal-delay-2">
+        <div class="step-num-wrap"><div class="step-num">03</div></div>
+        <div class="step-title">We build & fix</div>
+        <div class="step-desc">We set up, optimize, and claim your presence on every relevant platform within 48 hours.</div>
+      </div>
+      <div class="step-item reveal reveal-delay-3">
+        <div class="step-num-wrap"><div class="step-num">04</div></div>
+        <div class="step-title">We manage monthly</div>
+        <div class="step-desc">Reviews responded to, listings updated, report delivered. You just run your business.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="pricing-inner">
+    <div class="section-eyebrow reveal">Pricing</div>
+    <h2 class="section-h reveal">Simple pricing.<br><em>Real results.</em></h2>
+    <p class="section-sub reveal">No hidden fees. No contracts. Just results that show up in your phone ringing.</p>
+    <div class="pricing-grid">
+
+      <div class="price-card reveal">
+        <div class="price-badge badge-dim">Starter</div>
+        <div class="price-name">Starter Presence</div>
+        <div class="price-amount">
+          <span class="price-dollar">$</span>
+          <span class="price-num">249</span>
+        </div>
+        <div class="price-period">per month</div>
+        <div class="price-setup">+ $249 one-time setup</div>
+        <div class="price-divider"></div>
+        <div class="price-features">
+          <div class="price-feature check-green"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Google Business fully optimized</div>
+          <div class="price-feature check-green"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Listed on 20+ platforms</div>
+          <div class="price-feature check-green"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Professional description written</div>
+          <div class="price-feature check-green"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Review responses within 48hrs</div>
+          <div class="price-feature check-green"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Monthly performance report</div>
+        </div>
+        <button class="price-btn outline">Get started</button>
+      </div>
+
+      <div class="price-card featured reveal reveal-delay-1">
+        <div class="price-badge badge-gold">Most Popular</div>
+        <div class="price-name">Growth Presence</div>
+        <div class="price-amount">
+          <span class="price-dollar">$</span>
+          <span class="price-num">349</span>
+        </div>
+        <div class="price-period">per month</div>
+        <div class="price-setup">+ $399 one-time setup</div>
+        <div class="price-divider"></div>
+        <div class="price-features">
+          <div class="price-feature check-gold"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Everything in Starter</div>
+          <div class="price-feature check-gold"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Listed on 50+ platforms</div>
+          <div class="price-feature check-gold"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Review generation system</div>
+          <div class="price-feature check-gold"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Weekly Google Business post</div>
+          <div class="price-feature check-gold"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Competitor ranking snapshot</div>
+          <div class="price-feature check-gold"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Monthly photo refresh</div>
+        </div>
+        <button class="price-btn solid-gold">Get started</button>
+      </div>
+
+      <div class="price-card reveal reveal-delay-2">
+        <div class="price-badge badge-hot">Dominate</div>
+        <div class="price-name">Full Domination</div>
+        <div class="price-amount">
+          <span class="price-dollar">$</span>
+          <span class="price-num">497</span>
+        </div>
+        <div class="price-period">per month</div>
+        <div class="price-setup">+ $599 one-time setup</div>
+        <div class="price-divider"></div>
+        <div class="price-features">
+          <div class="price-feature check-green"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Everything in Growth</div>
+          <div class="price-feature check-green"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>4 social media posts monthly</div>
+          <div class="price-feature check-green"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Review responses within 24hrs</div>
+          <div class="price-feature check-green"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Quarterly full listing audit</div>
+          <div class="price-feature check-green"><div class="feat-check"><svg viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3"/></svg></div>Direct phone & text access</div>
+        </div>
+        <button class="price-btn solid-white">Get started</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2 class="cta-h reveal">Ready to be<br><em>found?</em></h2>
+    <p class="cta-sub reveal">Most businesses lose customers every day because they're invisible online. Let's fix that — starting this week.</p>
+    <div class="cta-actions reveal">
+      <a href="mailto:hello@getvisible.co" class="btn-gold">Contact us today</a>
+      <a href="#how" class="btn-ghost">Learn more →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    <svg viewBox="0 0 30 30" width="24" fill="none">
+      <polygon points="15,2 28,9 28,21 15,28 2,21 2,9" fill="rgba(212,168,83,0.15)" stroke="var(--gold)" stroke-width="1.5"/>
+      <polygon points="15,8 22,12 22,18 15,22 8,18 8,12" fill="var(--gold)" opacity="0.8"/>
+    </svg>
+    <span style="font-size:15px;font-weight:800;letter-spacing:-0.02em;margin-left:8px">Visible</span>
+  </div>
+  <div class="footer-copy">© 2025 Visible. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="#" class="footer-link">Privacy</a>
+    <a href="#" class="footer-link">Terms</a>
+    <a href="mailto:hello@getvisible.co" class="footer-link">Contact</a>
+  </div>
+</footer>
+
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+
+document.addEventListener('mousemove', e => {
+  mx=e.clientX; my=e.clientY;
+  cursor.style.left=mx+'px'; cursor.style.top=my+'px';
+});
+
+function animRing(){
+  rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+document.querySelectorAll('a,button,.price-card,.service-card,.problem-card,.agent-row').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.classList.add('hover');ring.classList.add('hover')});
+  el.addEventListener('mouseleave',()=>{cursor.classList.remove('hover');ring.classList.remove('hover')});
+});
+
+// Nav scroll
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>50);
+});
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible')}});
+},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
+reveals.forEach(el=>observer.observe(el));
+
+// Counter animation
+const counters = document.querySelectorAll('.count');
+const counterObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting && !e.target.dataset.done){
+      e.target.dataset.done='1';
+      const target=parseInt(e.target.dataset.target);
+      const duration=2000;
+      const step=target/60;
+      let current=0;
+      const timer=setInterval(()=>{
+        current=Math.min(current+step,target);
+        e.target.textContent=Math.round(current);
+        if(current>=target)clearInterval(timer);
+      },duration/60);
+    }
+  });
+},{threshold:0.5});
+counters.forEach(el=>counterObs.observe(el));
+
+// 3D card tilt
+const card = document.getElementById('dashCard');
+if(card){
+  card.parentElement.addEventListener('mousemove',e=>{
+    const rect=card.getBoundingClientRect();
+    const x=(e.clientX-rect.left)/rect.width-0.5;
+    const y=(e.clientY-rect.top)/rect.height-0.5;
+    card.style.transform=`rotateY(${x*12}deg) rotateX(${-y*12}deg) translateZ(10px)`;
+  });
+  card.parentElement.addEventListener('mouseleave',()=>{
+    card.style.transform='rotateY(0) rotateX(0) translateZ(0)';
+  });
+}
+</script>
+</body>
+</html>
